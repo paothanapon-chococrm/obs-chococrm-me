@@ -1,0 +1,20 @@
+{
+  "id": "conv-1787546371284-mvej53sch",
+  "providerId": "claude",
+  "title": "Knowledge summary",
+  "titleGenerationStatus": "success",
+  "createdAt": 1787546371301,
+  "lastActivityAt": 1787553142937,
+  "sessionId": null,
+  "selectedModel": "opus",
+  "usage": {
+    "model": "opus",
+    "inputTokens": 2,
+    "cacheCreationInputTokens": 23411,
+    "cacheReadInputTokens": 18237,
+    "contextWindow": 1000000,
+    "contextTokens": 41650,
+    "percentage": 4,
+    "contextWindowIsAuthoritative": true
+  }
+}

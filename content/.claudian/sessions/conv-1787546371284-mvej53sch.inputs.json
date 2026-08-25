@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "conversationId": "conv-1787546371284-mvej53sch",
+  "records": [
+    {
+      "schemaVersion": 1,
+      "id": "msg-1787546371369-ziqi5sn",
+      "userTurnOrdinal": 1,
+      "state": "accepted",
+      "localMessageId": "msg-1787546371277-7q70t11",
+      "timestamp": 1787546371277,
+      "rawDisplayText": "สรุปทุกอย่างที่นายรู้มาที",
+      "canonicalText": "สรุปทุกอย่างที่นายรู้มาที",
+      "images": [],
+      "contentDigest": "341475c986fc6b61234c7f61009eeb3f141b7c37bcb4563654833f8bb42e51b3",
+      "providerUserMessageId": "56cd04b9-6284-4963-8013-f901279e3873",
+      "providerAssistantMessageId": "60d096fb-a6eb-4e7a-bd16-64ce256b4ce0"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "msg-1787552923864-ai34c22",
+      "userTurnOrdinal": 2,
+      "state": "accepted",
+      "localMessageId": "msg-1787552923857-zysvkko",
+      "timestamp": 1787552923857,
+      "rawDisplayText": "สามารถเอา ไฟล์ 10-Sequence-Diagrame mermaid มาได้มั้ย",
+      "canonicalText": "สามารถเอา ไฟล์ 10-Sequence-Diagrame mermaid มาได้มั้ย",
+      "context": {
+        "editorSelection": {
+          "notePath": "Work/Manual-OrderId-Points/10-Sequence-Diagram.md",
+          "mode": "selection",
+          "selectedText": "%%{init: {'theme':'base', 'themeVariables': {'labelBoxBkgColor':'#FEF3C7','labelBoxBorderColor':'#F59E0B','labelTextColor':'#78350F','altBackground':'#F1F5F9','actorBkg':'#DBEAFE','actorBorder':'#3B82F6','noteBkgColor':'#FEF9C3','noteBorderColor':'#CA8A04'}}}%%\nsequenceDiagram\n    autonumber\n    actor AD as Admin\n    participant API as Backend API\n    participant DShop as ShopAccount 🟦\n    participant DCrit as PointCriteria 🟦\n\n    AD->>API: เชื่อม Channel/Account MKP (Shopee/Lazada/Tiktok)\n    API->>DShop: write ร้าน + ได้ ShopId\n    AD->>API: สร้าง Point Criteria (spend/SKU + cap + priority)\n    API->>DCrit: write เกณฑ์\n    AD->>API: ตั้ง status ปล่อยแต้ม + Real-time/T+1 + ACTIVE\n    API->>DCrit: write config\n    Note over DShop,DCrit: setup พร้อม → runtime (B) ใช้ต่อได้",
+          "lineCount": 15,
+          "startLine": 14
+        }
+      },
+      "images": [],
+      "contentDigest": "e3faebded8269c7f95804a37160ed9db660ceb78994512cd78ff236b6704ac7b",
+      "providerUserMessageId": "fe3bfbf9-54fe-42d3-8941-8a5b6cba82a2"
+    }
+  ]
+}
