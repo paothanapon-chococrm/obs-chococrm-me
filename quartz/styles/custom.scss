@@ -1,3 +1,16 @@
 @use "./variables.scss" as *;
 
-// put your custom CSS here!
+// The @quartz-themes/default theme sets --secondary / --tertiary to
+// hsl(calc(...)) which the browser stores unresolved. The mermaid plugin reads
+// these vars via getPropertyValue and mermaid's color parser throws on calc(),
+// breaking ALL diagrams. Pin them to concrete colors (from quartz.config.yaml)
+// so mermaid can parse them.
+// ponytail: hardcoded to config colors; drop if theme/mermaid plugin stops using calc()
+:root {
+  --secondary: #284b63 !important;
+  --tertiary: #84a59d !important;
+}
+:root[saved-theme="dark"] {
+  --secondary: #7b97aa !important;
+  --tertiary: #84a59d !important;
+}
