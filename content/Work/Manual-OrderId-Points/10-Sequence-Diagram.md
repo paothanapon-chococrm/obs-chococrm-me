@@ -11,6 +11,7 @@ created: 2026-08-21
 
 ## (A) Setup — admin เปิดร้าน/ตั้งค่า (ครั้งเดียว)
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'labelBoxBkgColor':'#FEF3C7','labelBoxBorderColor':'#F59E0B','labelTextColor':'#78350F','altBackground':'#F1F5F9','actorBkg':'#DBEAFE','actorBorder':'#3B82F6','noteBkgColor':'#FEF9C3','noteBorderColor':'#CA8A04'}}}%%
 sequenceDiagram
     autonumber
     actor AD as Admin
@@ -29,6 +30,7 @@ sequenceDiagram
 
 ## (B) End-user flow — End-User คิดแต้มจาก orderId (one-shot)
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'labelBoxBkgColor':'#FEF3C7','labelBoxBorderColor':'#F59E0B','labelTextColor':'#78350F','altBackground':'#F1F5F9','actorBkg':'#DBEAFE','actorBorder':'#3B82F6','noteBkgColor':'#FEF9C3','noteBorderColor':'#CA8A04'}}}%%
 sequenceDiagram
     autonumber
     actor OP as End-User
