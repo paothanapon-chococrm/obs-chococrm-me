@@ -9,6 +9,7 @@
 |---|---|---|
 | `CRM_Criteria_Config` | header | 1 แถว = 1 เกณฑ์ = 1 แถวในหน้า List |
 | `CRM_Criteria_Config_Detail` | detail | 1 แถว = 1 ร้านค้าที่เลือก + สถานะออเดอร์ที่ให้คะแนน |
+| `CRM_Criteria_Config_SKU` | detail | 1 แถว = 1 SKU ในเกณฑ์ — **1 เกณฑ์มี SKU ได้มากกว่า 1** (ใช้ตอน Point By = SKU) |
 
 Platform (Shopee/Lazada/Tiktok/MyShop) ไม่สร้างตาราง/FK — เก็บเป็น `PlatformId` (int) อ้าง Constants ใน core, derive desc ได้จาก `GetDesc()`
 
@@ -16,6 +17,9 @@ Platform (Shopee/Lazada/Tiktok/MyShop) ไม่สร้างตาราง/F
 - [[01-Schema]] — schema เต็ม 2 ตาราง + ER diagram
 - [[02-UI-Mapping]] — mapping ช่องบน UI → column + open points
 - [[03-Platform-Constant]] — Platform constant ใน core ที่ `PlatformId` อ้าง
+- [[04-PointBy-Constant]] — Point By code 1–7 (Fixed/Spending/SKUs) ที่ `Point_By` อ้าง + list endpoint
+- [[05-Validation]] — rule ตอน Add/Edit (1 active ต่อ Platform, field ตาม Point_By, ฯลฯ)
+- [[06-OrderStatus-Mapping]] — `Order_Status` เก็บ raw token ของ platform ที่เลือก (dropdown ตาม Platform) + earn matching
 
 ## Convention ที่ยึด
 อ้างอิงจาก lms-core (`CRM_Package_Criteria_Group.cs`, `BCRM_Master_Channel.cs`):

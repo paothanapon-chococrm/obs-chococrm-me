@@ -7,6 +7,7 @@
 ```mermaid
 erDiagram
     CRM_Criteria_Config ||--o{ CRM_Criteria_Config_Detail : "ร้านค้าในเกณฑ์"
+    CRM_Criteria_Config ||--o{ CRM_Criteria_Config_SKU : "SKU ในเกณฑ์ (Point By = SKU)"
 
     CRM_Criteria_Config {
         int Criteria_ConfigId PK
@@ -14,8 +15,10 @@ erDiagram
         int PlatformId "core constant"
         int Point_By
         nvarchar Point_By_Desc
-        int Earn_Point
+        int Fixed_Point
         int Extra_Point
+        int Spending_Base
+        int Spending_Point
         int Grand_Total_Point
         nvarchar Remark
         bit IsActive
@@ -32,8 +35,18 @@ erDiagram
         int Criteria_Config_DetailId PK
         int Criteria_ConfigId FK
         nvarchar Store_Ref
-        int Order_Status
+        nvarchar Order_Status
         nvarchar Order_Status_Desc
+        bit IsDeleted
+    }
+
+    CRM_Criteria_Config_SKU {
+        int Criteria_Config_SKUId PK
+        int Criteria_ConfigId FK
+        nvarchar SKU
+        int Quantity
+        int Point_Per_Qty
+        int Total_Point
         bit IsDeleted
     }
 ```
@@ -46,11 +59,13 @@ erDiagram
 | `Criteria_ConfigId` | int (identity) | No   | **PK**                                                                                                                                              |
 | `Criteria_Name`     | nvarchar(200)  | No   | "ชื่อเกณฑ์"                                                                                                                                         |
 | `PlatformId`        | int            | No   | code ของ platform (Shopee/Lazada/Tiktok/MyShop) — อ้าง Constants ใน core, desc ได้จาก `GetDesc()` ไม่ต้องเก็บ column แยก · [[03-Platform-Constant]] |
-| `Point_By`          | int            | No   | การให้คะแนน "Point By" (dropdown) — code ของ mode                                                                                                   |
-| `Point_By_Desc`     | nvarchar(100)  | No   | ข้อความ mode ที่เลือก                                                                                                                               |
-| `Earn_Point`        | int            | No   | Earn Point                                                                                                                                          |
-| `Extra_Point`       | int            | No   | Extra                                                                                                                                               |
-| `Grand_Total_Point` | int            | No   | = Earn_Point + Extra_Point (คำนวณตอน save)                                                                                                          |
+| `Point_By`          | int            | No   | code เรียง 1–7 ตรงกับ 7 ตัวเลือกใน dropdown (single 3 + combo 4) — เช็ค mode ด้วย `PointBy.HasFixed/HasSpending/HasSkus` · ดู [[04-PointBy-Constant]]      |
+| `Point_By_Desc`     | nvarchar(100)  | No   | ข้อความ mode ที่เลือก (เช่น "Fixed points + SKUs")                                                                                                  |
+| `Fixed_Point`       | int            | No   | mode **FIXED** — แต้มคงที่ต่อออเดอร์ที่เข้าเกณฑ์ (0 ถ้าไม่เปิด FIXED)                                                                              |
+| `Extra_Point`       | int            | No   | mode **FIXED** — แต้ม Extra บวกเพิ่มต่างหากจาก `Fixed_Point` (0 ถ้าไม่เปิด FIXED)                                                                  |
+| `Spending_Base`     | int            | No   | mode **SPENDING** — ยอดใช้จ่ายต่อรอบ เช่น 500 (บาท) (0 ถ้าไม่เปิด SPENDING)                                                                        |
+| `Spending_Point`    | int            | No   | mode **SPENDING** — แต้มต่อ 1 `Spending_Base` เช่น 10 → "ใช้ 500 ได้ 10 point" เก็บไว้ cal กับยอดบิลตอน earn (0 ถ้าไม่เปิด SPENDING)                |
+| `Grand_Total_Point` | int            | No   | ส่วนที่คำนวณได้ตอน save = `Fixed_Point + Extra_Point + SUM(SKU.Total_Point)`; **SPENDING ไม่รวม** เพราะขึ้นกับยอดบิลจริง (คำนวณตอน earn)             |
 | `Remark`            | nvarchar(500)  | Yes  | หมายเหตุ                                                                                                                                            |
 | `IsActive`          | bit            | No   | สถานะ ใช้งานอยู่ / ไม่ใช้งาน (toggle)                                                                                                               |
 | `Req_IdentityId`    | int            | No   | audit — ผู้ทำรายการ                                                                                                                                 |
@@ -69,10 +84,28 @@ erDiagram
 | `Criteria_Config_DetailId` | int (identity) | No | **PK** |
 | `Criteria_ConfigId` | int | No | **FK → `CRM_Criteria_Config.Criteria_ConfigId`** |
 | `Store_Ref` | nvarchar(100) | No | ร้านค้าของ channel ที่เลือก (เช่น Choco Official Store) |
-| `Order_Status` | int | No | "เลือกสถานะให้คะแนน" — code ของสถานะออเดอร์ |
-| `Order_Status_Desc` | nvarchar(100) | No | รอชำระเงิน / ชำระเงินสำเร็จ / อยู่ระหว่างการจัดส่ง / จัดส่งสำเร็จ |
+| `Order_Status` | nvarchar(64) | No | "เลือกสถานะให้คะแนน" — **raw token ของ platform นั้นตรงๆ** (เช่น Shopee `"COMPLETED"`, Lazada `"delivered"`) ใช้ match กับ status จาก hub · [[06-OrderStatus-Mapping]] |
+| `Order_Status_Desc` | nvarchar(100) | Yes | label แสดงบน UI (เช่น "จัดส่งสำเร็จ") |
 | `IsDeleted` | bit | No | soft delete |
+
+## CRM_Criteria_Config_SKU (detail — SKU)
+1 แถว = 1 SKU ที่ถูกเลือกในเกณฑ์ — **1 เกณฑ์มี SKU ได้มากกว่า 1** (ใช้ตอน `Point_By` = by SKU)
+
+| Column | Type | Null | Note |
+|---|---|---|---|
+| `Criteria_Config_SKUId` | int (identity) | No | **PK** |
+| `Criteria_ConfigId` | int | No | **FK → `CRM_Criteria_Config.Criteria_ConfigId`** |
+| `SKU` | nvarchar(100) | No | รหัส SKU ที่เลือก (ตรงกับ `CRM_Item.SKU` / `ItemListResp.Sku`) |
+| `Quantity` | int | No | จำนวนชิ้น (Pc(s)) ที่ต้อง match ถึงจะได้แต้ม |
+| `Point_Per_Qty` | int | No | "Point/Qt." — แต้มต่อ 1 ชิ้น |
+| `Total_Point` | int | No | = `Quantity × Point_Per_Qty` (คำนวณตอน save) |
+| `IsDeleted` | bit | No | soft delete |
+
+> **การคำนวณ (Point by SKU):** แต้มของแต่ละ SKU = `Quantity × Point_Per_Qty` → เก็บที่ `Total_Point` ของแถว.
+> "Total Point" ที่ read-only บน UI = `SUM(Total_Point)` ของทุก SKU ในเกณฑ์ → map ไป `CRM_Criteria_Config.Grand_Total_Point`.
+> ตอน earn จริง: จับ item ในออเดอร์ที่ SKU ตรงกับแถวนี้ แล้วให้แต้มตาม `Point_Per_Qty × จำนวนที่ซื้อ` (ยืนยัน rule ตัด/ปัดกับ marketplace hub)
 
 ## Index ที่แนะนำ
 - `CRM_Criteria_Config`: index บน `PlatformId`, `IsDeleted` (filter หน้า List)
 - `CRM_Criteria_Config_Detail`: index บน `Criteria_ConfigId` (join กลับ header)
+- `CRM_Criteria_Config_SKU`: index บน `Criteria_ConfigId` (join กลับ header)
