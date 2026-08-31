@@ -11,10 +11,10 @@
 ตอน earn: order จาก hub มี (platform, raw status) → เทียบตรงๆ กับ `Order_Status` ของเกณฑ์ platform เดียวกัน **string ตรงกัน = เข้าเกณฑ์** ไม่มีชั้น map/canonical มาคั่น
 
 ## ผลต่อ schema (`CRM_Criteria_Config_Detail`)
-| Column | เดิม | ใหม่ |
-|---|---|---|
-| `Order_Status` | int code | **nvarchar(64)** — raw token ของ platform (`"COMPLETED"`, `"delivered"`, …) ใช้ match กับ hub |
-| `Order_Status_Desc` | nvarchar | label แสดงบน UI (เช่น "จัดส่งสำเร็จ") — optional, ไว้โชว์เฉยๆ |
+| Column              | เดิม     | ใหม่                                                                                          |
+| ------------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `Order_Status`      | int code | **nvarchar(64)** — raw token ของ platform (`"COMPLETED"`, `"delivered"`, …) ใช้ match กับ hub |
+| `Order_Status_Desc` | nvarchar | label แสดงบน UI (เช่น "จัดส่งสำเร็จ") — optional, ไว้โชว์เฉยๆ                                 |
 
 > เก็บ raw token เป็นตัว match ไม่ใช่ int เพราะ token คือ id ที่เสถียรจาก API แต่ละเจ้า — เทียบกับ hub ได้ตรงไม่ต้องแปลง
 

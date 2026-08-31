@@ -9,7 +9,7 @@
 |---|---|---|---|
 | Fixed | Fixed point + Extra | `Fixed_Point`, `Extra_Point` | `Fixed_Point + Extra_Point` (คงที่) |
 | Spending | ยอดต่อรอบ + แต้มต่อรอบ เช่น "500 บ ได้ 10 point" | `Spending_Base`, `Spending_Point` | `floor(ยอดบิล / Spending_Base) × Spending_Point` (คำนวณตอน earn จากยอดบิลจริง) |
-| SKUs | section **SKUs** หลายแถว | `CRM_Criteria_Config_SKU` | `SUM(Quantity × Point_Per_Qty)` |
+| SKUs | section **SKUs** หลายแถว | `CRM_Criteria_Config_SKU` | ต่อ SKU ที่ซื้อ: `floor(จำนวนที่ซื้อ / Quantity) × Point_Per_Qty` (คำนวณตอน earn จากรายการ item จริง — เหมือน Spending) |
 
 ## 7 ตัวเลือกใน dropdown → ค่า `Point_By`
 เรียง single 3 ตัวก่อน แล้วค่อย combo — เลข 1–7 ต่อกันตรงๆ
@@ -24,7 +24,7 @@
 | 6 | Spending + SKUs | | ✓ | ✓ |
 | 7 | Fixed points + Spending + SKUs | ✓ | ✓ | ✓ |
 
-แต้มที่เกณฑ์ให้ = ผลรวมของ mode ที่ ✓. `Grand_Total_Point` เก็บเฉพาะส่วนคงที่ (Fixed + SKUs); ส่วน Spending ต้องรู้ยอดบิลก่อน จึงคำนวณตอน earn ไม่ใช่ตอน save
+แต้มที่เกณฑ์ให้ = ผลรวมของ mode ที่ ✓. `Grand_Total_Point` เก็บเฉพาะส่วนคงที่ (**Fixed เท่านั้น**); ทั้ง **Spending และ SKUs คำนวณตอน earn** เพราะต้องเห็นยอดบิล/รายการ item จริงก่อน (save-time ไม่รู้ว่าลูกค้าซื้ออะไรกี่ชิ้น)
 
 ## constant ที่ต้องเพิ่มใน core
 ตาม pattern `LmsOrderingMethodConst.Type` (เหมือน [[03-Platform-Constant]]) — int const + `Desc` + `GetDesc`. เพิ่ม helper `HasX` ไว้เช็คว่าแต่ละ code เปิด mode ไหน:
@@ -88,19 +88,22 @@ public override async Task<List<OptionResp>> HandleRequest(
 `Point_By` เป็นเลขเดียว 1–7 — ตอนรับจาก UI ก็เก็บ code ที่ dropdown ส่งมาตรงๆ, ตอนให้แต้มก็ถาม `HasX(Point_By)` ว่า mode ไหนเปิดบ้าง (ตรรกะ code→mode รวมอยู่ที่ `HasX` ที่เดียว ไม่กระจาย)
 
 ```csharp
+// ตอน earn — มี order (bill + รายการ item) จริงแล้ว
 int p = cfg.Point_By;   // เช่น 5 = Fixed points + SKUs
 int total = 0;
 
-if (PointBy.HasFixed(p))                                   // 5 → true
+if (PointBy.HasFixed(p))                                   // 5 → true (คงที่ รู้ตั้งแต่ save)
     total += cfg.Fixed_Point + cfg.Extra_Point;
 
 if (PointBy.HasSpending(p))                                // 5 → false, ข้าม
-    total += bill.Amount / cfg.Spending_Base * cfg.Spending_Point;
+    total += order.Amount / cfg.Spending_Base * cfg.Spending_Point;
 
-if (PointBy.HasSkus(p))                                    // 5 → true
-    total += skuRows.Sum(s => s.Total_Point);
+if (PointBy.HasSkus(p))                                    // 5 → true — ต้องดูรายการ item จริง
+    total += skuRows.Sum(s =>
+        order.QtyOf(s.SKU) / s.Quantity * s.Point_Per_Qty);   // floor ต่อ SKU ที่ซื้อ
 ```
 
+- **ทั้งบล็อกนี้รันตอน earn** (Fixed ก็เอามารวม ณ ตอนนั้น) — save-time เก็บได้แค่ `Grand_Total_Point = Fixed + Extra` ไว้โชว์ preview
 - แต่ละ mode เป็น `if` แยก **ไม่ใช่ `else if`** — combo เปิดพร้อมกันได้ แต้มบวกสะสม (`+=`) ตรงกับ [[02-UI-Mapping]] ว่า multi-mode = รวมกัน
 - อยากได้ badge Fixed/Spending/SKUs ในหน้า List ก็ถาม `HasX(Point_By)` เหมือนกัน
 - เลี่ยง `switch (p)` 7 เคส เพราะต้องเขียนตรรกะเดิมซ้ำ — `HasX` สั้นกว่าและแก้ที่เดียว

@@ -23,14 +23,13 @@
 | ↳ SKU (dropdown) | `SKU` |
 | ↳ Quantity (Pc(s)) | `Quantity` |
 | ↳ Point/Qt. | `Point_Per_Qty` |
-| ↳ (แต้มต่อแถว, ไม่มีช่องแยก) | `Total_Point` = `Quantity × Point_Per_Qty` |
-| Total Point (read-only ใต้ SKUs) | `SUM(Total_Point)` → `Grand_Total_Point` |
+| Total Point (read-only ใต้ SKUs) | **preview ฝั่งหน้าบ้าน** `Σ Quantity × Point_Per_Qty` — ไม่เก็บ DB, ไม่ใช่ยอดจริง (คิดจริงตอน earn) |
 | Point By (dropdown) | `Point_By` (code 1–7) + `Point_By_Desc` |
 | Fixed point (mode FIXED) | `Fixed_Point` |
 | Extra (mode FIXED) | `Extra_Point` |
 | ยอดต่อรอบ เช่น 500 (mode SPENDING) | `Spending_Base` |
 | แต้มต่อรอบ เช่น 10 (mode SPENDING) | `Spending_Point` |
-| Grand Total Point (read-only) | `Grand_Total_Point` = `Fixed_Point + Extra_Point + SUM(SKU.Total_Point)` |
+| Grand Total Point (read-only) | `Grand_Total_Point` = `Fixed_Point + Extra_Point` (ส่วนคงที่เท่านั้น; Spending/SKU คิดตอน earn) |
 | Remark | `Remark` |
 
 ## ส่ง payload ตอน Add/Edit ยังไง
@@ -82,9 +81,9 @@ badge Spending/SKU ในหน้า List = derive จาก bit ที่เ�
 |---|---|---|---|
 | `FIXED` | `Fixed_Point` + `Extra_Point` | `Fixed_Point + Extra_Point` | ตอน save (คงที่) |
 | `SPENDING` | `Spending_Base` + `Spending_Point` | `floor(ยอดบิล / Spending_Base) × Spending_Point` | ตอน earn (ต้องรู้ยอดบิล) |
-| `SKUS` | `CRM_Criteria_Config_SKU` | `SUM(Quantity × Point_Per_Qty)` | ตอน save (คงที่) |
+| `SKUS` | `CRM_Criteria_Config_SKU` | ต่อ SKU ที่ซื้อ: `floor(จำนวนที่ซื้อ / Quantity) × Point_Per_Qty` | ตอน earn (ต้องเห็นรายการ item) |
 
-`Grand_Total_Point` (read-only บน UI) = ผลรวมส่วนคงที่ = `FIXED + SKUS`; `SPENDING` บวกเพิ่มตอน earn
+`Grand_Total_Point` (read-only บน UI) = ส่วนคงที่ = `FIXED` เท่านั้น; `SPENDING` และ `SKUS` บวกเพิ่มตอน earn (ต้องเห็นยอดบิล/รายการ item จริง)
 
 ## Open Points
 1. **rounding ของ SPENDING** — `floor(ยอดบิล / Spending_Base) × Spending_Point` ปัดลงเป็น default; ยืนยันกฎปัด/เศษกับ marketplace hub

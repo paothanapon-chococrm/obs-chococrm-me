@@ -52,5 +52,4 @@ if (hasActive)
 ## Derive ตอน save (ไม่รับจาก client)
 - `Point_By_Desc` = `PointBy.GetDesc(Point_By)`
 - `Order_Status_Desc`, platform desc — derive จาก constant
-- `Total_Point` (ต่อ SKU) = `Quantity × Point_Per_Qty`
-- `Grand_Total_Point` = `Fixed_Point + Extra_Point + SUM(SKU.Total_Point)` (Spending ไม่รวม — คำนวณตอน earn)
+- `Grand_Total_Point` = `Fixed_Point + Extra_Point` เท่านั้น (Spending + SKUs ไม่รวม — คำนวณตอน earn จากยอดบิล/รายการ item จริง)
