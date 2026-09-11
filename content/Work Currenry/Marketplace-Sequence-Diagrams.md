@@ -44,7 +44,6 @@ created: 2026-09-11
 ### A1. ภาพรวม endpoint ทั้งชุด
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#DBEAFE','actorBorder':'#3B82F6','noteBkgColor':'#FEF9C3','noteBorderColor':'#CA8A04','altBackground':'#F1F5F9'}}}%%
 sequenceDiagram
     autonumber
     actor AD as Admin (BackOffice)
@@ -72,7 +71,7 @@ sequenceDiagram
     CritCtrl->>CritSvc: GetList(...)
     CritSvc->>MKPDB: page BCRM_MKP_Criteria_Config (!IsDeleted)
     CritSvc->>MKPDB: join Store_Ref → Shop_Sync.Shop_Name
-    CritSvc-->>AD: ListResult<Row>
+    CritSvc-->>AD: ListResult[Row]
     AD->>CritCtrl: GET Detail/{criteriaConfigId}
     CritCtrl->>CritSvc: GetDetail(brand,id)
     CritSvc->>MKPDB: read Config + Config_Detail + Config_SKU
@@ -84,7 +83,6 @@ sequenceDiagram
 `Upsert` ใช้ทั้ง Add (`Criteria_ConfigId == 0` → insert) และ Edit (reconcile ตาม natural key)
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#DBEAFE','actorBorder':'#3B82F6','noteBkgColor':'#FEF9C3','noteBorderColor':'#CA8A04','altBackground':'#F1F5F9'}}}%%
 sequenceDiagram
     autonumber
     actor AD as Admin
@@ -130,7 +128,6 @@ sequenceDiagram
 ### A3. SkuList dropdown — แกะ SKU จาก raw product (ต้องตรงกับที่ earn match)
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#DBEAFE','actorBorder':'#3B82F6','noteBkgColor':'#FEF9C3','noteBorderColor':'#CA8A04'}}}%%
 sequenceDiagram
     autonumber
     participant CritSvc as CritSvc.GetSkuList(brand,platform,shopRef?)
@@ -147,7 +144,7 @@ sequenceDiagram
         CritSvc->>MKPDB: TIKTOK → Raw_tik_tok_shop_product_details (title, skus[].id)
     end
     Note right of CritSvc: value (SKU) = key ที่ earn ใช้ match เป๊ะ<br/>distinct ตาม SKU, sort ตามชื่อ
-    CritSvc-->>CritSvc: List<MarketplaceSkuOption{Sku,Name}>
+    CritSvc-->>CritSvc: List[MarketplaceSkuOption{Sku,Name}]
 ```
 
 ---
@@ -163,7 +160,6 @@ entry 2 ทางใน `LmsMarketplaceEarnService`:
 ### B1. Flow เต็ม (Calculate → ถังก่อน, ไม่เจอ pull)
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#DBEAFE','actorBorder':'#3B82F6','noteBkgColor':'#FEF9C3','noteBorderColor':'#CA8A04','altBackground':'#F1F5F9'}}}%%
 sequenceDiagram
     autonumber
     actor U as ลูกค้า (WebApp)
@@ -257,7 +253,6 @@ Reject code: `1` order ไม่พบ · `2` ไม่มีเกณฑ์ act
 2. `CalculateByConnect` → `connectId = null` → **ข้ามถังเลย** ดึงสดอย่างเดียว
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#DBEAFE','actorBorder':'#3B82F6','noteBkgColor':'#FEF9C3','noteBorderColor':'#CA8A04','altBackground':'#F1F5F9'}}}%%
 sequenceDiagram
     autonumber
     participant EarnSvc as EarnSvc.CalculateCore
