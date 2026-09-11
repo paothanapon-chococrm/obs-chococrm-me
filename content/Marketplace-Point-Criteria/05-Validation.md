@@ -2,7 +2,7 @@
 
 กลับไป [[00-Overview]] · schema [[01-Schema]] · Point By [[04-PointBy-Constant]]
 
-รวม rule ที่ต้องเช็คตอน Add / Edit ก่อนบันทึก `CRM_Criteria_Config`
+รวม rule ที่ต้องเช็คตอน Add / Edit ก่อนบันทึก `BCRM_MKP_Criteria_Config`
 
 ## R1 — 1 Platform มีเกณฑ์ที่ active ได้แค่ 1 เกณฑ์
 ต่อ 1 `PlatformId` มีแถวที่ `IsActive = true` (และ `IsDeleted = false`) ได้ **ไม่เกิน 1**
@@ -13,7 +13,7 @@
 
 ```csharp
 // ใน Add/Edit handler ก่อน save เมื่อ req.IsActive == true
-bool hasActive = await db.CRM_Criteria_Config.AnyAsync(x =>
+bool hasActive = await db.BCRM_MKP_Criteria_Config.AnyAsync(x =>
     x.PlatformId == req.PlatformId &&
     x.IsActive && !x.IsDeleted &&
     x.Criteria_ConfigId != req.Criteria_ConfigId, ct);   // 0 ตอน Add
@@ -25,7 +25,7 @@ if (hasActive)
 // อันนี้ ข้อแนะนำเฉยๆ กัน Race 
 
 > DB-level backstop (ถ้าอยากกันแน่น): filtered unique index
-> `CREATE UNIQUE INDEX UX_Criteria_ActivePerPlatform ON CRM_Criteria_Config(PlatformId) WHERE IsActive = 1 AND IsDeleted = 0;`
+> `CREATE UNIQUE INDEX UX_Criteria_ActivePerPlatform ON BCRM_MKP_Criteria_Config(PlatformId) WHERE IsActive = 1 AND IsDeleted = 0;`
 > — ponytail: เริ่มด้วย app-check ตาม pattern handler เดิมก่อน; เพิ่ม filtered index เมื่อกลัว race condition
 
 ## R2 — field ตาม `Point_By` ที่เลือก
@@ -35,18 +35,18 @@ if (hasActive)
 |---|---|
 | Fixed | `Fixed_Point >= 0` (Extra จะ 0 ได้) |
 | Spending | `Spending_Base > 0` (**ห้าม 0** — หารตอน earn), `Spending_Point > 0` |
-| SKUs | มี `CRM_Criteria_Config_SKU` ≥ 1 แถว, ทุกแถว `Quantity > 0` และ `Point_Per_Qty >= 0` |
+| SKUs | มี `BCRM_MKP_Criteria_Config_SKU` ≥ 1 แถว, ทุกแถว `Quantity > 0` และ `Point_Per_Qty >= 0` |
 
 - mode ที่ **ไม่เปิด** → บังคับ field เป็น 0 / ไม่มีแถว (กันข้อมูลขยะ)
 
 ## R3 — ค่า enum/constant ต้อง valid
-- `Point_By` ∈ `PointBy.ValidList` (1–7) · [[04-PointBy-Constant]]
+- `PointBy.IsValid(Point_By)` (bitmask ≥1 bit, ไม่มี bit นอก 3 mode) · [[04-PointBy-Constant]]
 - `PlatformId` ∈ `Platform.ValidList` · [[03-Platform-Constant]]
 - `Order_Status` ∈ ชุด code สถานะออเดอร์ที่ยืนยันแล้ว · [[02-UI-Mapping]]
 
 ## R4 — required พื้นฐาน
 - `Criteria_Name` ไม่ว่าง
-- เลือกร้าน ≥ 1 (มี `CRM_Criteria_Config_Detail` ≥ 1 แถว) และแต่ละร้านต้องเลือก `Order_Status`
+- เลือกร้าน ≥ 1 (มี `BCRM_MKP_Criteria_Config_Detail` ≥ 1 แถว) และแต่ละร้านต้องเลือก `Order_Status`
 - SKU ในเกณฑ์เดียวกันห้ามซ้ำ (`SKU` unique ต่อ `Criteria_ConfigId`)
 
 ## Derive ตอน save (ไม่รับจาก client)

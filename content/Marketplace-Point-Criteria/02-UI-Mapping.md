@@ -5,7 +5,7 @@
 ## หน้า List (Point Criteria)
 | ช่องบน UI | Column |
 |---|---|
-| ชื่อเกณฑ์ | `CRM_Criteria_Config.Criteria_Name` |
+| ชื่อเกณฑ์ | `BCRM_MKP_Criteria_Config.Criteria_Name` |
 | Channel (icon Lazada/Shopee/…) | `PlatformId` → desc จาก core constant `GetDesc()` ([[03-Platform-Constant]]) |
 | ประเภท (badge Spending / SKU) | **derive จาก `Point_By`** — ไม่เก็บ column แยก |
 | สถานะ (ใช้งานอยู่ / ไม่ใช้งาน) | `IsActive` |
@@ -17,14 +17,14 @@
 | สถานะ (toggle ใช้งานอยู่) | `IsActive` |
 | ชื่อเกณฑ์ | `Criteria_Name` |
 | เลือก Channel (Shopee/Lazada/Tiktok/MyShop) | `PlatformId` (core constant) |
-| เลือกร้านค้า (checkbox หลายร้าน) | 1 แถว `CRM_Criteria_Config_Detail` ต่อ 1 ร้าน → `Store_Ref` |
+| เลือกร้านค้า (checkbox หลายร้าน) | 1 แถว `BCRM_MKP_Criteria_Config_Detail` ต่อ 1 ร้าน → `Store_Ref` |
 | dropdown "เลือกสถานะให้คะแนน" ต่อร้าน (ค่าตาม Platform ที่เลือก) | `Order_Status` (raw token) + `Order_Status_Desc` |
-| SKUs — ปุ่ม `+` เพิ่มได้หลายแถว (ตอน Point By = SKU) | 1 แถว `CRM_Criteria_Config_SKU` ต่อ 1 SKU |
+| SKUs — ปุ่ม `+` เพิ่มได้หลายแถว (ตอน Point By = SKU) | 1 แถว `BCRM_MKP_Criteria_Config_SKU` ต่อ 1 SKU |
 | ↳ SKU (dropdown) | `SKU` |
 | ↳ Quantity (Pc(s)) | `Quantity` |
 | ↳ Point/Qt. | `Point_Per_Qty` |
 | Total Point (read-only ใต้ SKUs) | **preview ฝั่งหน้าบ้าน** `Σ Quantity × Point_Per_Qty` — ไม่เก็บ DB, ไม่ใช่ยอดจริง (คิดจริงตอน earn) |
-| Point By (dropdown) | `Point_By` (code 1–7) + `Point_By_Desc` |
+| Point By (dropdown) | `Point_By` (bitmask 1/2/4) + `Point_By_Desc` |
 | Fixed point (mode FIXED) | `Fixed_Point` |
 | Extra (mode FIXED) | `Extra_Point` |
 | ยอดต่อรอบ เช่น 500 (mode SPENDING) | `Spending_Base` |
@@ -62,14 +62,14 @@
 dropdown แสดง status **ของ platform ที่เลือก** แล้วเก็บ raw token ตรงๆ ลง `Order_Status` (ไม่ normalize) — เช่น Shopee โชว์ `COMPLETED/SHIPPED/…`, Lazada โชว์ `delivered/shipped/…`. ค่าที่ show ใน 4 ข้อของ mockup เป็น label ไทย ไปอยู่ `Order_Status_Desc` · ชุด token เต็มต่อเจ้า + earn matching [[06-OrderStatus-Mapping]]
 
 ## Point By dropdown → mode
-`Point_By` เป็น code เรียง 1–7 ตรงกับ dropdown (single 3 + combo 4) · รายละเอียด [[04-PointBy-Constant]]
+`Point_By` เป็น **bitmask** (Fixed=1, Spending=2, SKUs=4), combo = OR bit · รายละเอียด [[04-PointBy-Constant]]
 
 | `Point_By` | Dropdown | เปิด sub-section |
-|---|---|---|
+|:-:|---|---|
 | 1 | Fixed points | Fixed point + Extra |
 | 2 | Spending | Spending_Base/Spending_Point |
-| 3 | SKUs | SKUs (`CRM_Criteria_Config_SKU`) |
-| 4 | Fixed points + Spending | Fixed + Spending |
+| 4 | SKUs | SKUs (`BCRM_MKP_Criteria_Config_SKU`) |
+| 3 | Fixed points + Spending | Fixed + Spending |
 | 5 | Fixed points + SKUs | Fixed + SKUs |
 | 6 | Spending + SKUs | Spending + SKUs |
 | 7 | Fixed points + Spending + SKUs | ทั้ง 3 |
@@ -81,7 +81,7 @@ badge Spending/SKU ในหน้า List = derive จาก bit ที่เ�
 |---|---|---|---|
 | `FIXED` | `Fixed_Point` + `Extra_Point` | `Fixed_Point + Extra_Point` | ตอน save (คงที่) |
 | `SPENDING` | `Spending_Base` + `Spending_Point` | `floor(ยอดบิล / Spending_Base) × Spending_Point` | ตอน earn (ต้องรู้ยอดบิล) |
-| `SKUS` | `CRM_Criteria_Config_SKU` | ต่อ SKU ที่ซื้อ: `floor(จำนวนที่ซื้อ / Quantity) × Point_Per_Qty` | ตอน earn (ต้องเห็นรายการ item) |
+| `SKUS` | `BCRM_MKP_Criteria_Config_SKU` | ต่อ SKU ที่ซื้อ: `floor(จำนวนที่ซื้อ / Quantity) × Point_Per_Qty` | ตอน earn (ต้องเห็นรายการ item) |
 
 `Grand_Total_Point` (read-only บน UI) = ส่วนคงที่ = `FIXED` เท่านั้น; `SPENDING` และ `SKUS` บวกเพิ่มตอน earn (ต้องเห็นยอดบิล/รายการ item จริง)
 

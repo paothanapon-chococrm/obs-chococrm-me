@@ -3,14 +3,14 @@
 กลับไป [[00-Overview]] · schema [[01-Schema]] · mapping [[02-UI-Mapping]]
 
 ## หลักการ — เก็บ status ดิบของ platform ตรงๆ ไม่ต้อง normalize
-1 เกณฑ์ผูกกับ **1 Platform** อยู่แล้ว (`CRM_Criteria_Config.PlatformId`) → dropdown "เลือกสถานะให้คะแนน" แสดง status ของ platform นั้น แล้วเก็บ **raw token ของ platform** ลง `Order_Status` ตรงๆ
+1 เกณฑ์ผูกกับ **1 Platform** อยู่แล้ว (`BCRM_MKP_Criteria_Config.PlatformId`) → dropdown "เลือกสถานะให้คะแนน" แสดง status ของ platform นั้น แล้วเก็บ **raw token ของ platform** ลง `Order_Status` ตรงๆ
 
 - ตั้งเกณฑ์ Shopee เลือก `COMPLETED` → เก็บ `Order_Status = "COMPLETED"`
 - ตั้งเกณฑ์ Lazada เลือก `delivered` → เก็บ `Order_Status = "delivered"`
 
 ตอน earn: order จาก hub มี (platform, raw status) → เทียบตรงๆ กับ `Order_Status` ของเกณฑ์ platform เดียวกัน **string ตรงกัน = เข้าเกณฑ์** ไม่มีชั้น map/canonical มาคั่น
 
-## ผลต่อ schema (`CRM_Criteria_Config_Detail`)
+## ผลต่อ schema (`BCRM_MKP_Criteria_Config_Detail`)
 | Column              | เดิม     | ใหม่                                                                                          |
 | ------------------- | -------- | --------------------------------------------------------------------------------------------- |
 | `Order_Status`      | int code | **nvarchar(64)** — raw token ของ platform (`"COMPLETED"`, `"delivered"`, …) ใช้ match กับ hub |
@@ -129,12 +129,12 @@ public async Task<IActionResult> OrderStatusList()
 ## ตอน earn — เทียบตรง
 ```
 order จาก hub: (platformId, rawStatus เช่น "COMPLETED")
-  → หา CRM_Criteria_Config ที่ PlatformId ตรง + active
+  → หา BCRM_MKP_Criteria_Config ที่ PlatformId ตรง + active
   → ใน detail ของร้านนั้น ถ้า Order_Status == rawStatus → เข้าเกณฑ์ ให้แต้มตาม Point_By
 ```
 
 ## Open Points
-1. **1 ร้านเลือกได้กี่ status** — mockup มี dropdown "Select Rating Status" เดียวต่อร้าน. ถ้าเลือกได้หลาย status ต่อร้าน → 1 แถว `CRM_Criteria_Config_Detail` ต่อ (ร้าน × status) ไม่ใช่ต่อร้าน
+1. **1 ร้านเลือกได้กี่ status** — mockup มี dropdown "Select Rating Status" เดียวต่อร้าน. ถ้าเลือกได้หลาย status ต่อร้าน → 1 แถว `BCRM_MKP_Criteria_Config_Detail` ต่อ (ร้าน × status) ไม่ใช่ต่อร้าน
 2. **Lazada** `statuses` เป็น array ระดับ item — order นับว่า "delivered" เมื่อไหร่ (ทุกชิ้น? ชิ้นใดชิ้นหนึ่ง?) ต้องยืนยันกติกาตอน earn
 3. **LineMyShop** — status อยู่ 3 field (`order_status`/`payment_status`/`shipment_status`) dropdown ควรโชว์ field ไหน/รวมยังไง ต้องดู payload จริง
 4. เช็คว่า hub ส่ง raw status ออกมาในรูปไหน (string เดิม vs แปลงแล้ว) ให้ match กับ token ที่เก็บได้

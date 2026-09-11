@@ -1,0 +1,17 @@
+Marketplace Point Criteria — EF scaffold
+=========================================
+ตารางใหม่ 3 ตัวอยู่ DB เดียวกับ [Privilege Database] (context BCRM_Privilege_Entities)
+รัน 07-Create-Tables.sql กับ brand DB ให้เสร็จก่อน แล้วค่อย scaffold
+
+cwd: lms-core/Choco.LMS.Database
+--force = regenerate ทั้ง context → ต้องใส่ตารางเดิมครบ + 3 ตัวใหม่ (ห้ามรันเฉพาะ 3 ตัว ทับของเดิม)
+
+
+[Privilege Database] — แทนบล็อกเดิมใน Entity Framework.txt (เพิ่ม 3 ตารางท้าย -t)
+--------------------------------------------------------------------------------
+dotnet-ef dbcontext scaffold "Data Source=dev-chocobcrm.database.windows.net;Initial Catalog=BCRM_5_BL6ZLW8PXBXD;Persist Security Info=True;Authentication=Active Directory Interactive;Encrypt=True;" Microsoft.EntityFrameworkCore.SqlServer -p Choco.LMS.Database --output-dir Models/DBModel/Privilege --context BCRM_Privilege_Entities --use-database-names -t CRM_Package -t CRM_Package_Group_Image -t CRM_Package_Image -t CRM_Package_Limit -t CRM_Package_Store_Mapping -t CRM_Package_Mapping -t CRM_Package_Subscription -t CRM_Package_Subscription_Detail -t CRM_Package_Master_Branch -t CRM_Package_Criteria_Group -t CRM_Package_Criteria_Group_Membership_Tier -t BP_Privilege_Reserve -t CRM_Privilege -t CRM_Privilege_Payload -t CRM_Privilege_Category -t CRM_Privilege_Category_Mapping -t CRM_Privilege_Code -t CRM_Privilege_Code_Ledger -t CRM_Privilege_Code_Reserve -t CRM_Privilege_Criteria -t CRM_Privilege_Criteria_Condition -t CRM_Privilege_Criteria_Group -t CRM_Privilege_Entry -t CRM_Privilege_Group -t CRM_Privilege_Group_Image -t CRM_Privilege_Group_Limit -t CRM_Privilege_Group_Mapping -t CRM_Privilege_Group_Transaction -t CRM_Privilege_Image -t CRM_Privilege_Ledger -t CRM_Privilege_Limit -t CRM_Privilege_Transactions -t CRM_Privilege_Store_Mapping -t CRM_Privilege_Mapping -t CRM_Privilege_Code_Template -t CRM_Privilege_Code_Template_Export -t CRM_Privilege_Code_Template_Track -t CRM_Privilege_Category_Group_Image -t CRM_Privilege_Category_Image -t CRM_Privilege_Default_Image -t CRM_Privilege_Code_Entry -t CRM_Privilege_Code_Pattern -t CRM_Privilege_Code_Platform_Reserve -t CRM_Privilege_Code_Platform_Reserve_Usage -t CRM_Privilege_Criteria_Group_Membership_Tier -t CRM_Privilege_Category_Membership_Tier -t CRM_Privilege_Master_Branch -t CRM_Privilege_Category_Master_Branch -t CRM_Privilege_Code_Customer_Used -t CRM_Privilege_Favorite -t CRM_Privilege_Group_Membership_Tier -t CRM_Privilege_Group_Master_Branch -t BCRM_MKP_Criteria_Config -t BCRM_MKP_Criteria_Config_Detail -t BCRM_MKP_Criteria_Config_SKU --force --no-onconfiguring
+
+
+[MKP Criteria only] — standalone context ไว้ลองก่อน (ไม่ทับ context เดิม)
+--------------------------------------------------------------------------------
+dotnet-ef dbcontext scaffold "Data Source=dev-chocobcrm.database.windows.net;Initial Catalog=BCRM_5_BL6ZLW8PXBXD;Persist Security Info=True;Authentication=Active Directory Interactive;Encrypt=True;" Microsoft.EntityFrameworkCore.SqlServer -p Choco.LMS.Database --output-dir Models/DBModel/MkpCriteria --context BCRM_MKP_Criteria_Entities --use-database-names -t BCRM_MKP_Criteria_Config -t BCRM_MKP_Criteria_Config_Detail -t BCRM_MKP_Criteria_Config_SKU --force --no-onconfiguring

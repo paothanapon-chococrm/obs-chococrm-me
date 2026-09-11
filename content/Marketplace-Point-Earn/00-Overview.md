@@ -17,6 +17,9 @@
 - ร้านค้า (`Store_Ref`), สถานะออเดอร์, ยอด/จำนวน SKU
 แล้ว match กับ `CRM_Criteria_Config_Detail` (store + order status) → ได้เกณฑ์ + แต้มที่จะให้
 
+> [!warning] ดีไซน์ที่ตั้งใจ — โค้ดยังไม่ทำครบ
+> การ match ด้วย **store + order status** ข้างบนคือ **เป้าหมาย** เท่านั้น. โค้ดตอนนี้ยัง gate ด้วย **platform อย่างเดียว** (store ตรงไม่ตรงไม่มีผล) เพราะ shop list ยังไม่เสร็จ → รายละเอียด [[04-Store-Gating-ยังไม่-enforce]]
+
 ## โครงสร้างข้อมูล
 | ตาราง | หน้าที่ |
 |---|---|
@@ -27,6 +30,8 @@
 ## เอกสาร
 - [[01-Schema]] — ตาราง claim + ER
 - [[02-Flow]] — ลำดับการเคลม + จุด validate + กันเคลมซ้ำ
+- [[03-API-Spec]] — endpoint `EarnCalculate` (req/resp/status/สูตร) — เฟสคำนวณ (ทำแล้ว, lazada)
+- [[04-Store-Gating-ยังไม่-enforce]] — ⚠️ **store/status gate ยังไม่ทำ** (คิดแต้มด้วย platform อย่างเดียว) — อ่านก่อนตรวจว่าแต้มออกถูก
 
 ## Convention ที่ยึด
 เหมือนฝั่ง Criteria — อ้าง lms-core:

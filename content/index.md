@@ -1,7 +1,6 @@
 ---
 title: Home
+publish: true
 ---
 
-ทดสอบ Share-Obsidian
-
-- [[ทด]]
+- [[Work Currenry/Marketplace-Sequence-Diagrams|Marketplace — Sequence Diagrams]]
